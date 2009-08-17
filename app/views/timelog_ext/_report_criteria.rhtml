@@ -1,0 +1,25 @@
+<% @hours.collect {|h| h[criterias[level]].to_s}.uniq.each do |value| %>
+<% hours_for_value = select_hours(hours, criterias[level], value) -%>
+<% next if hours_for_value.empty? -%>
+<tr class="<%= cycle('odd', 'even') %> <%= 'last-level' unless criterias.length > level+1 %>">
+<%= '<td></td>' * level %>
+<td><%= h(format_criteria_value(criterias[level], value)) %></td>
+<%= '<td></td>' * (criterias.length - level - 1) -%>
+  <% total = 0 -%>
+  <% costs = 0 -%>
+  <% @periods.each do |period| -%>
+    <% hours_for_period = select_hours(hours_for_value, @columns, period.to_s) -%>
+    <% sum = sum_hours(hours_for_period); total += sum -%>
+    <% cost = sum_costs(hours_for_period); costs += cost -%>    
+  <td class="hours"><%= html_hours("%.2f" % sum) if sum > 0 %></td>
+  <% end -%>
+  <% rate = avg_rate(hours_for_value) -%>
+  <td class="hours"><%= html_hours("%.2f" % total) if total > 0 %></td>
+  <td class="hours">$<%= html_hours("%.2f" % rate) %></td>
+  <td class="hours">$<%= html_hours("%.2f" % costs) %></td>
+</tr>
+<% if criterias.length > level+1 -%>
+  <%= render(:partial => 'report_criteria', :locals => {:criterias => criterias, :hours => hours_for_value, :level => (level + 1)}) %>
+<% end -%>
+
+<% end %>
